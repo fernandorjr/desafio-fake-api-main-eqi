@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Calculadora de Investimentos</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='../src/styles/style.css'>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://plentz.github.io/jquery-maskmoney/javascripts/jquery.maskMoney.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="../src/services/app.js" type="module"></script>
+    <script src="../src/services/masks.js" type="module"></script>
+    <script src="../src/services/dashboard.js" type="module"></script>
+</head>
+
+<body>
+
+    <div id="container" class="container">
+        <div class="row">
+            <div id="head" class="col-12">
+                <h1 class="header">Simulador de Investimentos</h1>
+            </div>
+        </div>
+
+        <div id="main" class="row">
+            <div id="simulador" class="col-sm-6">
+                <div class="row">
+                    <div class="col" id="window-header">
+                        <h3 class="window-header">Simulador</h3>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <form>
+                        <div class="row">
+                            <div class="col-sm">
+                                <fieldset>
+                                    <legend class="titulo">Rendimento</legend>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="radio" name="radio-rendimento" value="bruto"
+                                            id="bruto" checked>
+                                        <label for="bruto" class="label-radio">Bruto</label>
+                                        <input type="radio" class="radio" name="radio-rendimento" value="liquido"
+                                            id="liquido">
+                                        <label for="liquido" class="label-radio">Líquido</label>
+                                    </div>
+                                    <div class="formulario">
+                                        <label class="titulo">Aporte Inicial</label>
+                                        <input type="text" id="aporteInicial" class="input dinheiro" required>
+                                        <label class="titulo">Prazo (em meses)</label>
+                                        <input type="number" id="prazo" class="input" min="1" max="12" required>
+                                        <label class="titulo">IPCA (ao ano)</label>
+                                        <input type="text" id="ipca" class="input" readonly>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col-sm">
+                                <fieldset>
+                                    <legend class="titulo">Tipos de indexação</legend>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="radio" name="radio-indexacao" value="pre" id="pre">
+                                        <label for="pre" class="label-radio">PRÉ</label>
+                                        <input type="radio" class="radio" name="radio-indexacao" value="pos" id="pos"
+                                            checked>
+                                        <label for="pos" class="label-radio">PÓS</label>
+                                        <input type="radio" class="radio" name="radio-indexacao" value="ipca"
+                                            id="fixado">
+                                        <label for="fixado" class="label-radio">FIXADO</label>
+                                    </div>
+                                    <div class="formulario">
+                                        <label class="titulo">Aporte Mensal</label>
+                                        <input type="text" id="aporteMensal" class="input dinheiro" required>
+                                        <label class="titulo">Rentabilidade</label>
+                                        <input type="text" id="rentabilidade" class="input porcentagem" required>
+                                        <label class="titulo">CDI (ao ano)</label>
+                                        <input type="text" id="cdi" class="input" readonly>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="row linha-botao">
+                            <div class="col-sm">
+                                <button id="botao-limpar" class="botao">Limpar Campos</button>
+                            </div>
+                            <div class="col-sm">
+                                <button type="submit" id="botao-simular" class="botao botao-simular">Simular</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="resultado" class="col-sm-6">
+                <div class="row">
+                    <div class="col">
+                        <h3 class="window-header">Resultado da Simulação</h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="card-columns">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Valor final Bruto</h5>
+                                    <p id="valorFinalBruto" class="valor-card-body text-center"></p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Valor Final Líquido</h5>
+                                    <p id="valorFinalLiquido" class="valor-card resultado-valor"></p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Alíquita do IR</h5>
+                                    <p id="aliquotaIR" class="valor-card-body text-center"></p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Valor Total Investido</h5>
+                                    <p id="valorTotalInvestido" class="valor-card-body"></p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Valor Pago em IR</h5>
+                                    <p id="valorPagoIR" class="valor-card-body text-center"></p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Ganho Líquido</h5>
+                                    <p id="ganhoLiquido" class="valor-card resultado-valor"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <label class="titulo">Projeção de valores</label>
+                        <canvas id="dashboard" height="100px" aria-label="Hello ARIA World" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>
